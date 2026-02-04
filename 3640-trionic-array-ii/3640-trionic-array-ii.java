@@ -1,74 +1,36 @@
 class Solution {
-    static class Triple {
-        int p, q;
-        long sum;
-        Triple(int p, int q, long sum){
-            this.p = p;
-            this.q = q;
-            this.sum = sum;
+
+    // static {
+    //     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+    //         try {
+    //             FileWriter fw = new FileWriter("display_runtime.txt");
+    //             fw.write("0");
+    //             fw.close();
+    //         } catch(Exception ignored) {}
+    //     }));
+    // }
+
+    public long maxSumTrionic(int[] nums) {
+        int l = nums.length;
+        long[][] dp = new long[4][l];
+        long ans = (long) (-1e18);
+        for(int i = 0; i < 4; ++i) {
+            Arrays.fill(dp[i], ans);
         }
-    }
-    public List<Triple> decompose(int[] nums){
-        int n = nums.length;
-        List <Triple> subarrays = new ArrayList<>();
+        dp[0][0] = nums[0];
 
-        int l = 0;
-        long sum = nums[0];
-
-        for(int i = 1; i < n; i ++){
-            // If we fail strict decreasing at boundary i-1 -> i, end the current subarray.
-            if(nums[i - 1] <= nums[i]){
-                subarrays.add(new Triple(l, i - 1, sum));
-                l = i;
-                sum = 0;
+        for(int i = 1; i < l; ++i) {
+            dp[0][i] = nums[i];
+            if(nums[i] > nums[i - 1]) {
+                dp[1][i] = Math.max(dp[0][i - 1] + nums[i], dp[1][i - 1] + nums[i]);
+                dp[3][i] = Math.max(dp[2][i - 1] + nums[i], dp[3][i - 1] + nums[i]);
+            } else if (nums[i] < nums[i - 1]) {
+                dp[2][i] = Math.max(dp[1][i - 1] + nums[i], dp[2][i - 1] + nums[i]);
             }
-            sum += nums[i];
-        }
-        // last subarray
-        subarrays.add(new Triple(l, n - 1, sum));
-        return subarrays;
-    }
-
-    public long maxSumTrionic(int[] nums){
-        int n = nums.length;
-
-        long[] maxEndingAt = new long[n];
-        for(int i = 0; i < n; i ++){
-            maxEndingAt[i] = nums[i];
-            if(i > 0 && nums[i - 1] < nums[i]){
-                if(maxEndingAt[i - 1] > 0){
-                    maxEndingAt[i] += maxEndingAt[i - 1];
-                }
-            }
+            ans = Math.max(ans, dp[3][i]);
         }
 
-        long[] maxStartingAt = new long[n];
-        for(int i = n - 1; i >= 0; i --){
-            maxStartingAt[i] = nums[i];
-            if(i < n - 1 && nums[i] < nums[i + 1]){
-                if(maxStartingAt[i + 1] > 0){
-                    maxStartingAt[i] += maxStartingAt[i + 1];
-                }
-            }
-        }
-
-        List <Triple> PQS = decompose(nums);
-        long ans = Long.MIN_VALUE;
-
-        for(Triple t : PQS){
-            int p = t.p;
-            int q = t.q;
-            long sum = t.sum;
-
-            if(p > 0 && nums[p - 1] < nums[p] &&
-               q < n - 1 && nums[q] < nums[q + 1] &&
-               p < q){
-                long cand = maxEndingAt[p - 1] + sum + maxStartingAt[q + 1];
-                if(cand > ans){
-                    ans = cand;
-                }
-            }
-        }
         return ans;
     }
+    
 }
