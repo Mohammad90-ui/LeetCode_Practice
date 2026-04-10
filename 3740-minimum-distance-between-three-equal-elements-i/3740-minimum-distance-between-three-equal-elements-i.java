@@ -1,4 +1,4 @@
-// Added using AI
+
 class Solution {
     public int minimumDistance(int[] nums) {
         int n = nums.length ;
